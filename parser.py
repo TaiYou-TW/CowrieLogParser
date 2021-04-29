@@ -35,20 +35,20 @@ def classifier(log):
     global result, sources
 
     if log["eventid"] == "cowrie.login.failed":
-        result += f"{log['timestamp']}/{log['session']}/{log['src_ip']}:{sources[log['session']]}/loginError/{{\"username\":\"{log['username']}\", \"password\":\"{log['password']}\"}}\n"
+        result += f"{log['session']}/{log['timestamp']}/{log['src_ip']}:{sources[log['session']]}/loginError/{{\"username\":\"{log['username']}\", \"password\":\"{log['password']}\"}}\n"
     elif log["eventid"] == "cowrie.login.success":
-        result += f"{log['timestamp']}/{log['session']}/{log['src_ip']}:{sources[log['session']]}/loginSuccess/{{\"username\":\"{log['username']}\", \"password\":\"{log['password']}\"}}\n"
+        result += f"{log['session']}/{log['timestamp']}/{log['src_ip']}:{sources[log['session']]}/loginSuccess/{{\"username\":\"{log['username']}\", \"password\":\"{log['password']}\"}}\n"
     elif log["eventid"] == "cowrie.command.failed":
-        result += f"{log['timestamp']}/{log['session']}/{log['src_ip']}:{sources[log['session']]}/commandFailed/{log['input']}\n"
+        result += f"{log['session']}/{log['timestamp']}/{log['src_ip']}:{sources[log['session']]}/commandFailed/{log['input']}\n"
     elif log["eventid"] == "cowrie.command.input":
-        result += f"{log['timestamp']}/{log['session']}/{log['src_ip']}:{sources[log['session']]}/command/{log['input']}\n"
+        result += f"{log['session']}/{log['timestamp']}/{log['src_ip']}:{sources[log['session']]}/command/{log['input']}\n"
 
         found_files = find_sensitive_files(log)
         if found_files:
-            result += f"{log['timestamp']}/{log['session']}/{log['src_ip']}:{sources[log['session']]}/sensitiveFiles/{found_files}\n"
+            result += f"{log['session']}/{log['timestamp']}/{log['src_ip']}:{sources[log['session']]}/sensitiveFiles/{found_files}\n"
 
     elif log["eventid"] == "cowrie.session.connect":
-        result += f"{log['timestamp']}/{log['session']}/{log['src_ip']}:{log['src_port']}/connect/{log['src_ip']}\n"
+        result += f"{log['session']}/{log['timestamp']}/{log['src_ip']}:{log['src_port']}/connect/{log['src_ip']}\n"
         sources[log["session"]] = log["src_port"]
 
 

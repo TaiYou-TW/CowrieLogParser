@@ -6,7 +6,7 @@
 
 ## Format
 
-{ISO 8601 datetime}/{session_id}/{src_ip}:{src_port}/{operation}/{else infomation}
+{session_id}/{ISO 8601 datetime}/{src_ip}:{src_port}/{operation}/{else infomation}
 
 ### Operation
 
