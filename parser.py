@@ -73,3 +73,5 @@ with open(LOGS_FILENAME, mode="r") as f:
 with open(OUTPUT_FILENAME, mode="w") as f:
     f.write(result)
     f.close()
+
+print("success!")
