@@ -12,7 +12,7 @@ from twisted.python import log
 import cowrie.core.output
 from cowrie.core.config import CowrieConfig
 
-SPECIFY_FILE_LIST_FILENAME = "../../../files.txt"
+SPECIFY_FILE_LIST_FILENAME = "./files.txt"
 files = []
 
 

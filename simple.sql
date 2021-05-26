@@ -5,5 +5,5 @@ CREATE TABLE IF NOT EXISTS `simple_logs` (
   `ip` varchar(255) NOT NULL default '',
   `type` varchar(255) NOT NULL,
   `information` TEXT,
-  PRIMARY KEY  (`id`),
+  PRIMARY KEY  (`id`)
 ) ;
