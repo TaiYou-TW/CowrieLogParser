@@ -14,6 +14,7 @@ from cowrie.core.config import CowrieConfig
 
 SPECIFY_FILE_LIST_FILENAME = "./files.txt"
 files = []
+sources = {}
 table = CowrieConfig.get("output_mysql", "table")
 
 
@@ -127,27 +128,28 @@ class Output(cowrie.core.output.Output):
         d = self.db.runQuery(sql, args)
         d.addErrback(self.sqlerror)
 
-    @defer.inlineCallbacks
     def write(self, entry):
-        global table
+        global table, source
 
         if entry["eventid"] == "cowrie.session.connect":
             self.simpleQuery(
-                "INSERT INTO `" + table + "` (`session`, `timestamp`, `ip`, `type`) "
-                "VALUES (%s, FROM_UNIXTIME(%s), %s, %s)",
-                (entry["session"], entry["time"], entry["src_ip"], "connect"),
-            )
-
-        elif entry["eventid"] == "cowrie.login.success":
-            self.simpleQuery(
-                "INSERT INTO `"
-                + table
-                + "` (`session`, `timestamp`, `ip`, `type`, `information`) "
-                "VALUES (%s, FROM_UNIXTIME(%s), %s, %s, %s)",
+                f"INSERT INTO `{table}` (`session`, `timestamp`, `ip`, `type`) VALUES (%s, FROM_UNIXTIME(%s), %s, %s)",
                 (
                     entry["session"],
                     entry["time"],
-                    entry["src_ip"],
+                    f'{entry["src_ip"]}:{entry["src_port"]}',
+                    "connect"
+                ),
+            )
+            sources[entry["session"]] = entry["src_port"]
+
+        elif entry["eventid"] == "cowrie.login.success":
+            self.simpleQuery(
+                f"INSERT INTO `{table}` (`session`, `timestamp`, `ip`, `type`, `information`) VALUES (%s, FROM_UNIXTIME(%s), %s, %s, %s)",
+                (
+                    entry["session"],
+                    entry["time"],
+                    f'{entry["src_ip"]}:{sources[entry["session"]]}',
                     "loginSuccess",
                     f'{{"username":"{entry["username"]}","password":{entry["password"]}}}',
                 ),
@@ -155,14 +157,11 @@ class Output(cowrie.core.output.Output):
 
         elif entry["eventid"] == "cowrie.login.failed":
             self.simpleQuery(
-                "INSERT INTO `"
-                + table
-                + "` (`session`, `timestamp`, `ip`, `type`, `information`) "
-                "VALUES (%s, FROM_UNIXTIME(%s), %s, %s, %s)",
+                f"INSERT INTO `{table}` (`session`, `timestamp`, `ip`, `type`, `information`) VALUES (%s, FROM_UNIXTIME(%s), %s, %s, %s)",
                 (
                     entry["session"],
                     entry["time"],
-                    entry["src_ip"],
+                    f'{entry["src_ip"]}:{sources[entry["session"]]}',
                     "loginFailed",
                     f'{{"username":"{entry["username"]}","password":{entry["password"]}}}',
                 ),
@@ -170,14 +169,11 @@ class Output(cowrie.core.output.Output):
 
         elif entry["eventid"] == "cowrie.command.input":
             self.simpleQuery(
-                "INSERT INTO `"
-                + table
-                + "` (`session`, `timestamp`, `ip`, `type`, `information`) "
-                "VALUES (%s, FROM_UNIXTIME(%s), %s, %s, %s)",
+                f"INSERT INTO `{table}` (`session`, `timestamp`, `ip`, `type`, `information`) VALUES (%s, FROM_UNIXTIME(%s), %s, %s, %s)",
                 (
                     entry["session"],
                     entry["time"],
-                    entry["src_ip"],
+                    f'{entry["src_ip"]}:{sources[entry["session"]]}',
                     "command",
                     entry["input"],
                 ),
@@ -186,14 +182,11 @@ class Output(cowrie.core.output.Output):
             found_files = find_sensitive_files(entry["input"])
             if found_files:
                 self.simpleQuery(
-                    "INSERT INTO `"
-                    + table
-                    + "` (`session`, `timestamp`, `ip`, `type`, `information`) "
-                    "VALUES (%s, FROM_UNIXTIME(%s), %s, %s, %s)",
+                    f"INSERT INTO `{table}` (`session`, `timestamp`, `ip`, `type`, `information`) VALUES (%s, FROM_UNIXTIME(%s), %s, %s, %s)",
                     (
                         entry["session"],
                         entry["time"],
-                        entry["src_ip"],
+                        f'{entry["src_ip"]}:{sources[entry["session"]]}',
                         "sensitiveFiles",
                         found_files,
                     ),
@@ -201,14 +194,11 @@ class Output(cowrie.core.output.Output):
 
         elif entry["eventid"] == "cowrie.command.failed":
             self.simpleQuery(
-                "INSERT INTO `"
-                + table
-                + "` (`session`, `timestamp`, `ip`, `type`, `information`) "
-                "VALUES (%s, FROM_UNIXTIME(%s), %s, %s, %s)",
+                f"INSERT INTO `{table}` (`session`, `timestamp`, `ip`, `type`, `information`) VALUES (%s, FROM_UNIXTIME(%s), %s, %s, %s)",
                 (
                     entry["session"],
                     entry["time"],
-                    entry["src_ip"],
+                    f'{entry["src_ip"]}:{sources[entry["session"]]}',
                     "commandFailed",
                     entry["input"],
                 ),
